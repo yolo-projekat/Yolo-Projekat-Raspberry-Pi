@@ -1,0 +1,14 @@
+[Unit]
+Description=Kretanje Server
+After=network.target
+
+[Service]
+User=pi
+WorkingDirectory=/home/kretanje
+ExecStart=/home/kretanje/venv/bin/python /home/kretanje/server15.py
+Restart=always
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

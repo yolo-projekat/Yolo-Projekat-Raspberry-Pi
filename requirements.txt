@@ -1,0 +1,6 @@
+websockets
+aiohttp
+gpiozero
+lgpio
+#Picamera2 se ne instalira preko komande pip, vec se koristi:
+# sudo apt install python3-picamera2
