@@ -36,7 +36,7 @@ Preporučena lokacija projekta je /home/kretanje:
 Bash
 mkdir -p /home/kretanje
 cd /home/kretanje
-# Ovde kopirajte fajl server15.py
+# Ovde kopirajte fajl server.py
 
 ###3. Virtuelno okruženje
 Zbog zavisnosti od sistemskih drajvera, okruženje se pravi sa --system-site-packages:
