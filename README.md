@@ -1,4 +1,4 @@
-# 🤖 Mecanum Robot Control Server
+# 🤖 YOLO vozilo Control Server
 
 Ovaj projekat omogućava daljinsko upravljanje robotom sa 4 točka putem **WebSockets** protokola, uz strimovanje slike sa kamere putem **HTTP** servera. Optimizovan je za Raspberry Pi uređaje i koristi `picamera2` za napredne funkcije poput digitalnog zumiranja.
 
