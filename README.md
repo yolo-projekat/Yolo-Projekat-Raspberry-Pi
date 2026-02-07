@@ -1,6 +1,3 @@
-Evo ispravljenog koda za YOLO Kontrolni Server README. Fokusirao sam se na to da tvoje ime i ime mentora budu savršeno centrirani u donjem delu, uz popravljenu strukturu celog fajla.
-
-Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
@@ -27,15 +24,15 @@ Markdown
 ### 🛰️ Real-Time Komunikacija
 * **WebSocket Command Center:** Asinhrona obrada komandi na portu `1606` za trenutni odziv kretanja.
 * **High-Speed Vision:** HTTP striming frejmova putem `/capture` endpointa (Port `1607`) uz podršku za visoki FPS.
-* **Mecanum Kinematics:** Napredni algoritmi kretanja (napred, nazad, dijagonalno, rotacija u mestu).
+* **Mecanum Kinematics:** Napredni algoritmi kretanja (napred, nazad, levo, desno, dijagonalno i rotacija).
 
 ### 📸 Vision Engineering
-* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana direktno u `picamera2` bez uticaja na mrežnu latenciju.
+* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana direktno u `picamera2` bez prekida strima.
 * **Stream Optimization:** MJPEG kompresija optimizovana za prenos preko Wi-Fi pristupne tačke robota.
 
 ### 🛡️ Fail-Safe Sistemi
 * **Signal Handling:** Automatska neutralizacija svih GPIO izlaza pri detekciji `SIGINT` ili `SIGTERM` signala.
-* **Service Persistence:** Integracija sa `systemd` osigurava maksimalnu dostupnost i automatski oporavak servisa pri pokretanju sistema.
+* **Service Persistence:** Integracija sa `systemd` osigurava maksimalnu dostupnost i automatski oporavak servisa.
 
 ---
 
@@ -92,6 +89,7 @@ Status: Dinamičko praćenje opterećenja procesora tokom AI analize.
 <div align="center">
 
 Autor: Danilo Stoletović  •  Mentor: Dejan Batanjac
+
 
 ETŠ „Nikola Tesla“ Niš • 2026
 
