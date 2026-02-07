@@ -87,7 +87,7 @@ journalctl -u kretanje.service -f
 
 • sᴛᴀᴛᴜs: ᴅɪɴᴀᴍɪčᴋᴏ ᴘʀᴀćᴇɴᴊᴇ ᴏᴘᴛᴇʀᴇćᴇɴᴊᴀ ᴘʀᴏᴄᴇsᴏʀᴀ.
 
-Autor: <b>Danilo Stoletovic •  Mentor: Dejan Batanjac
+Autor: Danilo Stoletovic •  Mentor: Dejan Batanjac
 
 
 ETŠ „Nikola Tesla“ Niš  2026
