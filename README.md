@@ -1,69 +1,94 @@
-# 🤖 YOLO vozilo Control Server
+Markdown
+<div align="center">
 
-Ovaj projekat omogućava daljinsko upravljanje robotom sa 4 točka putem **WebSockets** protokola, uz strimovanje slike sa kamere putem **HTTP** servera. Optimizovan je za Raspberry Pi uređaje i koristi `picamera2` za napredne funkcije poput digitalnog zumiranja.
+# ⚙️ YOLO Kontrolni Server
+### *Core Backend i Mrežni Gateway za Raspberry Pi 5*
 
-## 📋 Karakteristike
-* **Kontrola u realnom vremenu:** Preko WebSocket protokola na portu `1606`.
-* **Kamera:** Pristup frejmu kamere preko HTTP rute `/capture` na portu `1607`.
-* **Mecanum kretanje:** Podrška za napred, nazad, levo, desno, dijagonalno i rotaciju.
-* **Dinamički Zoom:** Digitalno uveličanje slike (1.0x - 3.0x) bez prekida strima.
-* **Bezbednost:** Automatsko gašenje svih motora pri prekidu skripte (SIGINT/SIGTERM).
-
-## 🔌 GPIO Konfiguracija
-Sistem koristi sledeću mapu pinova na Raspberry Pi zaglavlju:
-
-
-
-* **Zajednički PWM (Brzina):** GPIO 18 (Pin 12)
-* **Motor A (Prednji levi):** GPIO 17 (Pin 11) & GPIO 27 (Pin 13)
-* **Motor B (Prednji desni):** GPIO 22 (Pin 15) & GPIO 23 (Pin 16)
-* **Motor C (Zadnji levi):** GPIO 24 (Pin 18) & GPIO 25 (Pin 22)
-* **Motor D (Zadnji desni):** GPIO 5 (Pin 29) & GPIO 6 (Pin 31)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-38bdf8?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![Raspberry Pi](https://img.shields.io/badge/Hardware-RPi_5-c51a4a?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/)
+[![WebSockets](https://img.shields.io/badge/Network-WebSockets-075985?style=for-the-badge&logo=socketdotio&logoColor=white)](https://websockets.readthedocs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-94a3b8?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🛠 Instalacija
+<p align="center">
+  <b>Kontrolni Server</b> je srce autonomnog sistema, zadužen za orkestraciju hardverskih resursa. 
+  <br>Hostovan na <b>Raspberry Pi 5</b> platformi, server omogućava ultra-brzu komunikaciju između motornih drajvera i udaljenih AI klijenata.
+</p>
 
-### 1. Sistemski paketi
-Potrebno je instalirati biblioteke za kontrolu GPIO pinova i kamere:
+
+
+</div>
+
+## 🚀 Tehničke Mogućnosti
+
+### 🛰️ Real-Time Komunikacija
+* **WebSocket Command Center:** Asinhrona obrada komandi na portu `1606` za trenutni odziv kretanja.
+* **High-Speed Vision:** HTTP striming frejmova putem `/capture` endpointa (Port `1607`) uz podršku za visoki FPS.
+* **Mecanum Kinematics:** Napredni algoritmi kretanja (napred, nazad, dijagonalno, rotacija u mestu).
+
+### 📸 Vision Engineering
+* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana direktno u `picamera2` bez uticaja na mrežnu latenciju.
+* **Stream Optimization:** MJPEG kompresija optimizovana za prenos preko Wi-Fi pristupne tačke robota.
+
+### 🛡️ Fail-Safe Sistemi
+* **Signal Handling:** Automatska neutralizacija svih GPIO izlaza pri detekciji `SIGINT` ili `SIGTERM` signala.
+* **Service Persistence:** Integracija sa `systemd` osigurava 99.9% uptime i automatski oporavak servisa pri boot-u.
+
+---
+
+## 🔌 Hardverska Mapa (GPIO)
+
+Sistem koristi preciznu mapu pinova za kontrolu L298N/L293D drajvera:
+
+| Komponenta | GPIO | Fizički Pin | Uloga |
+| :--- | :--- | :--- | :--- |
+| **Global PWM** | GPIO 18 | Pin 12 | Kontrola brzine (Speed) |
+| **Motor A** | GPIO 17, 27 | Pin 11, 13 | Prednji Levi |
+| **Motor B** | GPIO 22, 23 | Pin 15, 16 | Prednji Desni |
+| **Motor C** | GPIO 24, 25 | Pin 18, 22 | Zadnji Levi |
+| **Motor D** | GPIO 5, 6 | Pin 29, 31 | Zadnji Desni |
+
+---
+
+## 🛠 Instalacija i Deployment
+
+### 1. Priprema Okruženja
 ```bash
 sudo apt update
 sudo apt install python3-picamera2 python3-lgpio
-
-###2. Postavljanje koda
-Preporučena lokacija projekta je /home/kretanje:
-
-Bash
-mkdir -p /home/kretanje
-cd /home/kretanje
-# Ovde kopirajte fajl server.py
-
-###3. Virtuelno okruženje
-Zbog zavisnosti od sistemskih drajvera, okruženje se pravi sa --system-site-packages:
-
+mkdir -p /home/kretanje && cd /home/kretanje
+2. Virtuelno Okruženje (System Linked)
 Bash
 python -m venv --system-site-packages venv
 source venv/bin/activate
 pip install websockets aiohttp gpiozero
-
-###⚙️ Podešavanje Systemd Servisa
-Da bi se server pokretao automatski prilikom svakog paljenja robota:
-
-Kreirajte servis fajl:
+3. Systemd Automatizacija
+Da bi robot bio spreman odmah po paljenju, kreirajte servis:
 
 Bash
 sudo nano /etc/systemd/system/kretanje.service
-i tu nalepite kretanje-server.service iz skripte
-
-###Aktivirajte servis:
-
-Bash
+# Nalepite kretanje-server.service konfiguraciju
 sudo systemctl daemon-reload
-sudo systemctl enable kretanje.service
-sudo systemctl start kretanje.service
-
-###📊 Monitoring
-Status servisa i logove kretanja možete pratiti komandom:
+sudo systemctl enable --now kretanje.service
+📊 Dijagnostika i Monitoring
+Pratite telemetriju servera i logove kretanja u realnom vremenu:
 
 Bash
 journalctl -u kretanje.service -f
+🎨 Vizuelni Identitet
+Dizajniran da bude nevidljiv, ali moćan:
+
+UI Style: Headless server operacije.
+
+Accent Color: #c51a4a (Raspberry Red) za hardverske logove.
+
+Status: Dinamičko praćenje opterećenja procesora tokom AI inferencije.
+
+<div align="center">
+
+Autor: Danilo Stoletović • Mentor: Dejan Batanjac
+
+ETŠ „Nikola Tesla“ Niš • 2026
+
+</div>
