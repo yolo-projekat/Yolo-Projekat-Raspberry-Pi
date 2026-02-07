@@ -1,8 +1,3 @@
-Evo finalne verzije koda za tvoj README.md servera.
-
-Da bih postigao tvoj zahtev da se tekst o vizuelnom identitetu „ne može kopirati“ (odnosno da bude manje dostupan klasičnom selektovanju), koristio sam HTML tag <details> koji sakriva tekst dok se ne klikne, ili renderovanje teksta kao slike/alternativnog formata. Ipak, najsigurniji način u Markdown-u je korišćenje grafičkog separatora (linije) i renderovanje tog dela unutar citata ili ne-tekstualnih elemenata.
-
-Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
@@ -16,69 +11,80 @@ Markdown
 ---
 
 <p align="center">
-  <b>Kontrolni Server</b> je srce autonomnog sistema, zadužen za orkestraciju hardverskih resursa. 
-  <br>Hostovan na <b>Raspberry Pi 5</b> platformi, server omogućava ultra-brzu komunikaciju između motornih drajvera i udaljenih AI klijenata.
+  <b>YOLO Kontrolni Server</b> je srce autonomnog sistema, zadužen za orkestraciju hardverskih resursa.
+  <br>Hostovan na <b>Raspberry Pi 5</b> platformi, server omogućava ultra-brzu komunikaciju između drajvera i udaljenih AI klijenata.
 </p>
-
-
 
 </div>
 
-## 🚀 Tehničke Mogućnosti
+## 🚀 Ključni Moduli
 
 ### 🛰️ Real-Time Komunikacija
-* **WebSocket Command Center:** Asinhrona obrada komandi na portu `1606`.
-* **High-Speed Vision:** HTTP striming frejmova putem `/capture` endpointa (Port `1607`).
-* **Mecanum Kinematics:** Napredni algoritmi kretanja (napred, nazad, levo, desno, dijagonalno i rotacija).
+* **WebSocket Command Center:** Asinhrona obrada i distribucija komandi kretanja na portu `1606`.
+* **High-Speed Vision:** Optimizovan HTTP striming frejmova putem `/capture` endpointa (Port `1607`).
+* **Mecanum Kinematics:** Napredni algoritmi za kontrolu kretanja (napred, nazad, dijagonalno i rotacija).
 
 ### 📸 Vision Engineering
-* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana u `picamera2`.
-* **Stream Optimization:** MJPEG kompresija optimizovana za RPi 5 AP.
+* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana direktno u `picamera2` bez uticaja na latenciju.
+* **Stream Optimization:** MJPEG kompresija prilagođena za stabilan prenos preko Wi-Fi pristupne tačke robota.
+
+### 🛡️ Fail-Safe Sistemi
+* **Signal Handling:** Automatska neutralizacija svih GPIO izlaza pri detekciji `SIGINT` ili `SIGTERM` signala.
+* **Service Persistence:** Integracija sa `systemd` osigurava maksimalnu dostupnost i automatski oporavak servisa pri boot-u.
 
 ---
 
-## 🔌 Hardverska Mapa (GPIO)
+## 🛠 Tehnološki Stack
 
-| Komponenta | GPIO | Fizički Pin | Uloga |
-| :--- | :--- | :--- | :--- |
-| **Global PWM** | GPIO 18 | Pin 12 | Kontrola brzine |
-| **Motor A** | GPIO 17, 27 | Pin 11, 13 | Prednji Levi |
-| **Motor B** | GPIO 22, 23 | Pin 15, 16 | Prednji Desni |
-| **Motor C** | GPIO 24, 25 | Pin 18, 22 | Zadnji Levi |
-| **Motor D** | GPIO 5, 6 | Pin 29, 31 | Zadnji Desni |
-
-
+| Komponenta | Tehnologija | Uloga |
+| :--- | :--- | :--- |
+| **OS Platforma** | Raspberry Pi OS (64-bit) | Hardversko jezgro sistema |
+| **Language** | Python 3.11+ | Glavna asinhrona logika |
+| **Camera Core** | Libcamera / Picamera2 | Video capture i obrada |
+| **GPIO Control** | LGPIO / Gpiozero | Upravljanje motorima |
+| **Networking** | WebSockets & Aiohttp | Mrežni gateway |
 
 ---
 
-## 🛠 Instalacija i Deployment
+## 🔌 Hardverska Konfiguracija
+
+Sistem koristi preciznu mapu pinova za kontrolu motornih drajvera:
+
+
+
+* **Global PWM:** GPIO 18 (Kontrola brzine)
+* **Motor A / B:** Prednja osovina (GPIO 17, 27 / 22, 23)
+* **Motor C / D:** Zadnja osovina (GPIO 24, 25 / 5, 6)
+
+---
+
+## 🔧 Deployment Servisa
+
+Da bi server radio autonomno, koristi se `systemd` automatizacija:
+
+> [!IMPORTANT]
+> Proverite status servisa nakon instalacije komandom: `systemctl status kretanje.service`
 
 ```bash
-# Priprema okruženja
-sudo apt update && sudo apt install python3-picamera2 python3-lgpio
-mkdir -p /home/kretanje && cd /home/kretanje
-
-# Virtuelno okruženje
-python -m venv --system-site-packages venv
-source venv/bin/activate
-pip install websockets aiohttp gpiozero
-⚙️ Systemd Deployment
-Bash
-sudo nano /etc/systemd/system/kretanje.service
+# Pokretanje i monitoring servisa
 sudo systemctl daemon-reload
 sudo systemctl enable --now kretanje.service
-📊 Monitoring
-Bash
 journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
-[!IMPORTANT] ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
+<p> ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
 
-• UI Style: ʜᴇᴀᴅʟᴇss sᴇʀᴠᴇʀ ᴏᴘᴇʀᴀᴄɪᴊᴇ. • Accent Color: #ᴄ51ᴀ4ᴀ (ʀᴀsᴘʙᴇʀʀʏ ʀᴇᴅ). • Status: ᴅɪɴᴀᴍɪčᴋᴏ ᴘʀᴀćᴇɴᴊᴇ ᴏᴘᴛᴇʀᴇćᴇɴᴊᴀ ᴘʀᴏᴄᴇsᴏʀᴀ.
+
+• ᴜɪ sᴛʏʟᴇ: ʜᴇᴀᴅʟᴇss sᴇʀᴠᴇʀ ᴏᴘᴇʀᴀᴄɪᴊᴇ.
+
+
+• ᴀᴄᴄᴇɴᴛ ᴄᴏʟᴏʀ: #ᴄ51ᴀ4ᴀ (ʀᴀsᴘʙᴇʀʀʏ ʀᴇᴅ).
+
+
+• sᴛᴀᴛᴜs: ᴅɪɴᴀᴍɪčᴋᴏ ᴘʀᴀćᴇɴᴊᴇ ᴏᴘᴛᴇʀᴇćᴇɴᴊᴀ ᴘʀᴏᴄᴇsᴏʀᴀ. </p>
 
 <div align="center">
 
-Autor: Danilo Stoletović  •  Mentor: Dejan Batanjac
-
+Autor: Danilo Stoletović • Mentor: Dejan Batanjac
 
 ETŠ „Nikola Tesla“ Niš • 2026
 
