@@ -50,6 +50,8 @@
 
 Sistem koristi preciznu mapu pinova za kontrolu motornih drajvera:
 
+
+
 * **Global PWM:** GPIO 18 (Kontrola brzine)
 * **Motor A / B:** Prednja osovina (GPIO 17, 27 / 22, 23)
 * **Motor C / D:** Zadnja osovina (GPIO 24, 25 / 5, 6)
@@ -58,15 +60,19 @@ Sistem koristi preciznu mapu pinova za kontrolu motornih drajvera:
 
 ## 🔧 Deployment Servisa
 
-Da bi server radio autonomno, koristi se `systemd` automatizacija:
+Da bi server radio autonomno, koristi se `systemd` automatizacija. Pratite ove korake u terminalu:
 
 > [!IMPORTANT]
 > Proverite status servisa nakon instalacije komandom: `systemctl status kretanje.service`
 
 ```bash
-# Pokretanje i monitoring servisa
+# Učitavanje nove konfiguracije
 sudo systemctl daemon-reload
+
+# Omogućavanje automatskog pokretanja pri boot-u
 sudo systemctl enable --now kretanje.service
+
+# Praćenje logova u realnom vremenu
 journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
 <p align="left"> ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
