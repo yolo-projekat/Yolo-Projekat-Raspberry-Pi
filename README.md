@@ -1,3 +1,6 @@
+Evo kompletnog i ispravljenog koda za YOLO Kontrolni Server README fajl, sa svim popravkama za systemd sekciju, vizuelni identitet i potpis, spreman za kopiranje u tvoj README.md.
+
+Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
@@ -64,16 +67,16 @@ Bash
 python -m venv --system-site-packages venv
 source venv/bin/activate
 pip install websockets aiohttp gpiozero
-3. Systemd Automatizacija
-Da bi robot bio spreman odmah po paljenju, kreirajte servis:
+3. Deployment Servisa
+Da bi se server pokretao automatski prilikom svakog paljenja robota, potrebno je konfigurisati systemd servis.
 
 Bash
 sudo nano /etc/systemd/system/kretanje.service
-# Nalepite sadržaj kretanje-server.service fajla
+# Nalepite sadržaj kretanje-server.service fajla u editor
 sudo systemctl daemon-reload
 sudo systemctl enable --now kretanje.service
 📊 Dijagnostika i Monitoring
-Pratite telemetriju servera i logove kretanja u realnom vremenu:
+Pratite telemetriju servera i logove kretanja u realnom vremenu komandom:
 
 Bash
 journalctl -u kretanje.service -f
@@ -88,8 +91,6 @@ Status: Dinamičko praćenje opterećenja procesora tokom AI analize.
 
 <div align="center">
 
-Autor: Danilo Stoletović • Mentor: Dejan Batanjac
-
-ETŠ „Nikola Tesla“ Niš • 2026
+Autor: Danilo Stoletović • Mentor: Dejan Batanjac ETŠ „Nikola Tesla“ Niš • 2026
 
 </div>
