@@ -50,8 +50,6 @@
 
 Sistem koristi preciznu mapu pinova za kontrolu motornih drajvera:
 
-
-
 * **Global PWM:** GPIO 18 (Kontrola brzine)
 * **Motor A / B:** Prednja osovina (GPIO 17, 27 / 22, 23)
 * **Motor C / D:** Zadnja osovina (GPIO 24, 25 / 5, 6)
@@ -71,7 +69,8 @@ sudo systemctl daemon-reload
 sudo systemctl enable --now kretanje.service
 journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
-<p> ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
+<p align="left"> ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
+
 
 
 • ᴜɪ sᴛʏʟᴇ: ʜᴇᴀᴅʟᴇss sᴇʀᴠᴇʀ ᴏᴘᴇʀᴀᴄɪᴊᴇ.
@@ -82,10 +81,7 @@ journalctl -u kretanje.service -f
 
 • sᴛᴀᴛᴜs: ᴅɪɴᴀᴍɪčᴋᴏ ᴘʀᴀćᴇɴᴊᴇ ᴏᴘᴛᴇʀᴇćᴇɴᴊᴀ ᴘʀᴏᴄᴇsᴏʀᴀ. </p>
 
-<div align="center">
+<div align="center"> <p> Autor: <b>Danilo Stoletović</b> &nbsp;•&nbsp; Mentor: <b>Dejan Batanjac</b>
 
-Autor: Danilo Stoletović • Mentor: Dejan Batanjac
 
-ETŠ „Nikola Tesla“ Niš • 2026
-
-</div>
+ETŠ „Nikola Tesla“ Niš &nbsp;•&nbsp; 2026 </p> </div>
