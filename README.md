@@ -1,4 +1,4 @@
-Evo kompletnog i ispravljenog koda za YOLO Kontrolni Server README fajl, sa svim popravkama za systemd sekciju, vizuelni identitet i potpis, spreman za kopiranje u tvoj README.md.
+Evo ispravljenog koda za YOLO Kontrolni Server README. Fokusirao sam se na to da tvoje ime i ime mentora budu savršeno centrirani u donjem delu, uz popravljenu strukturu celog fajla.
 
 Markdown
 <div align="center">
@@ -91,6 +91,8 @@ Status: Dinamičko praćenje opterećenja procesora tokom AI analize.
 
 <div align="center">
 
-Autor: Danilo Stoletović • Mentor: Dejan Batanjac ETŠ „Nikola Tesla“ Niš • 2026
+Autor: Danilo Stoletović  •  Mentor: Dejan Batanjac
+
+ETŠ „Nikola Tesla“ Niš • 2026
 
 </div>
