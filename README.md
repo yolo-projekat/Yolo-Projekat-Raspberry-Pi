@@ -75,7 +75,7 @@ sudo systemctl enable --now kretanje.service
 # Praćenje logova u realnom vremenu
 journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
-<p align="left"> ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
+ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
 
 
 
