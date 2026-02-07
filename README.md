@@ -1,4 +1,3 @@
-Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
@@ -33,13 +32,15 @@ Markdown
 
 ### 🛡️ Fail-Safe Sistemi
 * **Signal Handling:** Automatska neutralizacija svih GPIO izlaza pri detekciji `SIGINT` ili `SIGTERM` signala.
-* **Service Persistence:** Integracija sa `systemd` osigurava 99.9% uptime i automatski oporavak servisa pri boot-u.
+* **Service Persistence:** Integracija sa `systemd` osigurava maksimalnu dostupnost i automatski oporavak servisa pri pokretanju sistema.
 
 ---
 
 ## 🔌 Hardverska Mapa (GPIO)
 
 Sistem koristi preciznu mapu pinova za kontrolu L298N/L293D drajvera:
+
+
 
 | Komponenta | GPIO | Fizički Pin | Uloga |
 | :--- | :--- | :--- | :--- |
@@ -68,7 +69,7 @@ Da bi robot bio spreman odmah po paljenju, kreirajte servis:
 
 Bash
 sudo nano /etc/systemd/system/kretanje.service
-# Nalepite kretanje-server.service konfiguraciju
+# Nalepite sadržaj kretanje-server.service fajla
 sudo systemctl daemon-reload
 sudo systemctl enable --now kretanje.service
 📊 Dijagnostika i Monitoring
@@ -77,13 +78,13 @@ Pratite telemetriju servera i logove kretanja u realnom vremenu:
 Bash
 journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
-Dizajniran da bude nevidljiv, ali moćan:
+Dizajniran da bude diskretan, ali moćan:
 
 UI Style: Headless server operacije.
 
 Accent Color: #c51a4a (Raspberry Red) za hardverske logove.
 
-Status: Dinamičko praćenje opterećenja procesora tokom AI inferencije.
+Status: Dinamičko praćenje opterećenja procesora tokom AI analize.
 
 <div align="center">
 
