@@ -65,6 +65,8 @@ Da bi server radio autonomno, koristi se `systemd` automatizacija. Pratite ove k
 
 > [!IMPORTANT]
 > Proverite status servisa nakon instalacije komandom: `systemctl status kretanje.service`
+
+
 🎨 Vizuelni Identitet
 Dizajniran da bude diskretan, ali moćan:
 
