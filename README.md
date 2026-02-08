@@ -1,6 +1,3 @@
-Evo kompletnog koda za tvoj Python Backend (YOLO Kontrolni Server) u Markdown formatu, spreman za kopiranje:
-
-Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
