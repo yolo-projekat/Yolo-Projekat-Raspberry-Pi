@@ -1,3 +1,6 @@
+Evo kompletnog koda za tvoj Python Backend (YOLO Kontrolni Server) u Markdown formatu, spreman za kopiranje:
+
+Markdown
 <div align="center">
 
 # ⚙️ YOLO Kontrolni Server
@@ -50,8 +53,6 @@
 
 Sistem koristi preciznu mapu pinova za kontrolu motornih drajvera:
 
-
-
 * **Global PWM:** GPIO 18 (Kontrola brzine)
 * **Motor A / B:** Prednja osovina (GPIO 17, 27 / 22, 23)
 * **Motor C / D:** Zadnja osovina (GPIO 24, 25 / 5, 6)
@@ -64,30 +65,19 @@ Da bi server radio autonomno, koristi se `systemd` automatizacija. Pratite ove k
 
 > [!IMPORTANT]
 > Proverite status servisa nakon instalacije komandom: `systemctl status kretanje.service`
-
-```bash
-# Učitavanje nove konfiguracije
-sudo systemctl daemon-reload
-
-# Omogućavanje automatskog pokretanja pri boot-u
-sudo systemctl enable --now kretanje.service
-
-# Praćenje logova u realnom vremenu
-journalctl -u kretanje.service -f
 🎨 Vizuelni Identitet
-ᴅɪᴢᴀᴊɴɪʀᴀɴ ᴅᴀ ʙᴜᴅᴇ ᴅɪsᴋʀᴇᴛᴀɴ, ᴀʟɪ ᴍᴏćᴀɴ.
+Dizajniran da bude diskretan, ali moćan:
 
+UI Style: Headless server operacije (CLI fokus).
 
+Accent Color: #c51a4a (Raspberry Red).
 
-• ᴜɪ sᴛʏʟᴇ: ʜᴇᴀᴅʟᴇss sᴇʀᴠᴇʀ ᴏᴘᴇʀᴀᴄɪᴊᴇ.
+Status: Dinamičko praćenje opterećenja procesora i temperature senzora.
 
+<div align="center">
 
-• ᴀᴄᴄᴇɴᴛ ᴄᴏʟᴏʀ: #ᴄ51ᴀ4ᴀ (ʀᴀsᴘʙᴇʀʀʏ ʀᴇᴅ).
+Autor: Danilo Stoletović • Mentor: Dejan Batanjac
 
+ETŠ „Nikola Tesla“ Niš • 2026
 
-• sᴛᴀᴛᴜs: ᴅɪɴᴀᴍɪčᴋᴏ ᴘʀᴀćᴇɴᴊᴇ ᴏᴘᴛᴇʀᴇćᴇɴᴊᴀ ᴘʀᴏᴄᴇsᴏʀᴀ.
-
-Autor: Danilo Stoletovic •  Mentor: Dejan Batanjac
-
-
-ETŠ „Nikola Tesla“ Niš  2026
+</div>
