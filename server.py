@@ -1,170 +1,236 @@
-import websockets
 import asyncio
-import io
+import logging
 import signal
 import sys
-from datetime import datetime
+import time
+
+import numpy as np
+from aiohttp import web
+from aiortc import RTCPeerConnection, RTCSessionDescription, VideoStreamTrack
+from av import VideoFrame
 from gpiozero import PWMOutputDevice, DigitalOutputDevice
 from gpiozero.pins.lgpio import LGPIOFactory
-from aiohttp import web
 from picamera2 import Picamera2
 
-# --- GPIO & HARDWARE CONFIGURATION ---
+# --- CONFIGURATION & LOGGING ---
+logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
+
+# --- GPIO PIN MAPPING ---
 factory = LGPIOFactory()
-mapa = {
-    11: 17, 12: 18, 13: 27, 15: 22,
-    16: 23, 18: 24, 22: 25, 29: 5, 31: 6
-}
+PIN_MAP = {11: 17, 12: 18, 13: 27, 15: 22, 16: 23, 18: 24, 22: 25, 29: 5, 31: 6}
 
-ENABCD = PWMOutputDevice(pin=mapa[12], frequency=50, pin_factory=factory)
+ENABCD = PWMOutputDevice(pin=PIN_MAP[12], frequency=50, pin_factory=factory)
+motor_pins = [DigitalOutputDevice(pin=PIN_MAP[p], pin_factory=factory) for p in (11, 13, 15, 16, 18, 22, 29, 31)]
 
-motorA_IN1 = DigitalOutputDevice(pin=mapa[11], pin_factory=factory)
-motorA_IN2 = DigitalOutputDevice(pin=mapa[13], pin_factory=factory)
-motorB_IN3 = DigitalOutputDevice(pin=mapa[15], pin_factory=factory)
-motorB_IN4 = DigitalOutputDevice(pin=mapa[16], pin_factory=factory)
-motorC_IN1 = DigitalOutputDevice(pin=mapa[18], pin_factory=factory)
-motorC_IN2 = DigitalOutputDevice(pin=mapa[22], pin_factory=factory)
-motorD_IN3 = DigitalOutputDevice(pin=mapa[29], pin_factory=factory)
-motorD_IN4 = DigitalOutputDevice(pin=mapa[31], pin_factory=factory)
-
-motor_pins = [
-    motorA_IN1, motorA_IN2, 
-    motorB_IN3, motorB_IN4,
-    motorC_IN1, motorC_IN2, 
-    motorD_IN3, motorD_IN4
-]
-
-# --- MOVEMENT LOGIC MAPS ---
+# --- O(1) MOVEMENT LOOKUPS ---
 MOVEMENTS = {
     "napred":    (1, 1, 1, 1),
     "nazad":     (-1, -1, -1, -1),
     "levo":      (-1, 1, -1, 1),
     "desno":     (1, -1, 1, -1),
-    "rot_levo":  (-1, -1, 1, 1), 
+    "rot_levo":  (-1, -1, 1, 1),
     "rot_desno": (1, 1, -1, -1),
-    "stop":      (0, 0, 0, 0)
+    "stop":      (0, 0, 0, 0),
 }
 
 DIAGONALS = {
     frozenset(["napred", "desno"]): (1, 1, 0, 0),
     frozenset(["napred", "levo"]):  (0, 0, 1, 1),
     frozenset(["nazad", "desno"]):  (-1, -1, 0, 0),
-    frozenset(["nazad", "levo"]):   (0, 0, -1, -1)
+    frozenset(["nazad", "levo"]):   (0, 0, -1, -1),
 }
 
-# --- CAMERA SETUP ---
-picam2 = Picamera2()
-config = picam2.create_video_configuration(
-    main={"size": (640, 480), "format": "RGB888"},
-    raw={"size": (3280, 2464)}
-)
-picam2.configure(config)
-picam2.set_controls({"ScalerCrop": (0, 0, 3280, 2464)})
-zoom_level = 1.0
+ROTATION_CMDS = frozenset(["rot_levo", "rot_desno"])
+SPEED_NORMAL = 0.3
+SPEED_ROTATION = 0.15
 
-# --- HELPER FUNCTIONS ---
-def log(message):
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {message}")
+# --- GLOBAL STATE ---
+LAST_CMD_TIME = 0.0
+WATCHDOG_TIMEOUT = 0.5  # Seconds
+CAMERA_ACTIVE = True
+LATEST_FRAME_ARRAY = None
+FRAME_EVENT = asyncio.Event()
+
+# --- HARDWARE CONTROL ---
+def set_motor_state(in1, in2, state):
+    if state == 1: in1.on(); in2.off()
+    elif state == -1: in1.off(); in2.on()
+    else: in1.off(); in2.off()
 
 def stop_motors():
-    ENABCD.value = 0
-    for pin in motor_pins:
-        pin.off()
+    if ENABCD.value != 0:
+        ENABCD.value = 0
+        for pin in motor_pins: pin.off()
 
-def set_motor_state(in1, in2, state):
-    if state == 1:
-        in1.on(); in2.off()
-    elif state == -1:
-        in1.off(); in2.on()
-    else:
-        in1.off(); in2.off()
-
-def execute_move(states, duty_cycle=0.3):
-    ENABCD.value = duty_cycle
+def execute_move(states, duty_cycle=SPEED_NORMAL):
+    if ENABCD.value != duty_cycle:  # Prevent redundant I/O calls
+        ENABCD.value = duty_cycle
     for i, state in enumerate(states):
-        set_motor_state(motor_pins[i*2], motor_pins[i*2+1], state)
+        set_motor_state(motor_pins[i * 2], motor_pins[i * 2 + 1], state)
 
-def apply_zoom(level):
-    global zoom_level
-    zoom_level = max(0.1, min(3.0, level))
-    full_w, full_h = 3280, 2464
-    w, h = int(full_w / zoom_level), int(full_h / zoom_level)
-    x, y = (full_w - w) // 2, (full_h - h) // 2
-    try:
-        picam2.set_controls({"ScalerCrop": (x, y, w, h)})
-        log(f"[ZOOM] Faktor: {zoom_level:.2f}")
-    except Exception as e:
-        log(f"[ZOOM ERROR] {e}")
+# --- WATCHDOG TASK ---
+async def motor_watchdog():
+    """Prevents runaway robot on UDP packet loss."""
+    while True:
+        if ENABCD.value > 0 and (time.time() - LAST_CMD_TIME > WATCHDOG_TIMEOUT):
+            logger.warning("UDP timeout. Engaging emergency stop.")
+            stop_motors()
+        await asyncio.sleep(0.1)
 
-# --- HANDLERS ---
-async def websocket_handler(websocket, path=None):
-    client_ip = websocket.remote_address[0]
-    log(f"Novi klijent: {client_ip}")
-    try:
-        async for message in websocket:
-            msg = message.strip().lower()
-            
-            if msg.startswith("zoom:"):
-                try:
-                    apply_zoom(float(msg.split(":")[1]))
-                    continue
-                except: continue
+# --- UDP PROTOCOL ---
+class RobotUDPControl(asyncio.DatagramProtocol):
+    def connection_made(self, transport):
+        self.transport = transport
+        logger.info("UDP Control bound to 0.0.0.0:1606")
 
+    def datagram_received(self, data, addr):
+        global LAST_CMD_TIME
+        LAST_CMD_TIME = time.time()  # Reset watchdog
+        
+        try:
+            msg = data.decode('utf-8').strip().lower()
             parts = msg.split('+')
             cmd_set = frozenset(parts)
 
             if "stop" in cmd_set:
                 stop_motors()
             elif len(parts) == 1 and parts[0] in MOVEMENTS:
-                # LOWER SPEED FOR ROTATION (0.15 instead of 0.3)
-                speed = 0.15 if "rot_" in parts[0] else 0.3
-                execute_move(MOVEMENTS[parts[0]], duty_cycle=speed)
+                cmd = parts[0]
+                speed = SPEED_ROTATION if cmd in ROTATION_CMDS else SPEED_NORMAL
+                execute_move(MOVEMENTS[cmd], duty_cycle=speed)
             elif len(parts) == 2 and cmd_set in DIAGONALS:
-                execute_move(DIAGONALS[cmd_set])
-            else:
-                await websocket.send("Nevalida komanda")
-    except Exception as e:
-        log(f"WS Greska: {e}")
-        stop_motors()
+                execute_move(DIAGONALS[cmd_set], duty_cycle=SPEED_NORMAL)
+        except Exception as e:
+            logger.error(f"UDP parse error: {e}")
 
-async def capture_image(request):
-    try:
-        buffer = io.BytesIO()
-        await asyncio.get_event_loop().run_in_executor(
-            None, lambda: picam2.capture_file(buffer, format='jpeg')
-        )
-        return web.Response(body=buffer.getvalue(), content_type='image/jpeg')
-    except Exception as e:
-        return web.Response(status=500)
+# --- CAMERA PRODUCER (SINGLETON) ---
+async def camera_producer(picam2):
+    """Fetches frames constantly to shared memory, decoupled from WebRTC clients."""
+    global LATEST_FRAME_ARRAY
+    loop = asyncio.get_running_loop()
+    
+    while CAMERA_ACTIVE:
+        try:
+            # Threaded capture prevents blocking asyncio loop
+            array = await loop.run_in_executor(None, picam2.capture_array, "main")
+            LATEST_FRAME_ARRAY = array
+            FRAME_EVENT.set()
+            FRAME_EVENT.clear()
+            await asyncio.sleep(0.033) # Max ~30fps to prevent CPU saturation
+        except Exception as e:
+            logger.error(f"Camera Producer error: {e}")
+            await asyncio.sleep(1)
 
-# --- SYSTEM CONTROL ---
-def shutdown_handler(signum, frame):
-    log("Gašenje...")
+# --- WEBRTC VIDEO TRACK (CONSUMER) ---
+class SharedCameraTrack(VideoStreamTrack):
+    """Consumes the global frame array, allowing N clients without hardware contention."""
+    def __init__(self):
+        super().__init__()
+
+    async def recv(self):
+        pts, time_base = await self.next_timestamp()
+        
+        await FRAME_EVENT.wait() # Efficient wait for next frame
+        if LATEST_FRAME_ARRAY is None:
+            raise Exception("No frame available")
+
+        # PyAV isolates memory, making it thread-safe for multiple tracks
+        frame = VideoFrame.from_ndarray(LATEST_FRAME_ARRAY, format="rgb24")
+        frame.pts = pts
+        frame.time_base = time_base
+        return frame
+
+# --- WEBRTC SIGNALING ---
+pcs = set()
+
+async def rtc_offer(request):
+    params = await request.json()
+    offer = RTCSessionDescription(sdp=params["sdp"], type=params["type"])
+
+    pc = RTCPeerConnection()
+    pcs.add(pc)
+
+    @pc.on("iceconnectionstatechange")
+    async def on_iceconnectionstatechange():
+        if pc.iceConnectionState in ["failed", "closed", "disconnected"]:
+            logger.info(f"Closing dead WebRTC connection.")
+            await pc.close()
+            pcs.discard(pc)
+
+    pc.addTrack(SharedCameraTrack())
+    await pc.setRemoteDescription(offer)
+    answer = await pc.createAnswer()
+    await pc.setLocalDescription(answer)
+
+    return web.json_response({"sdp": pc.localDescription.sdp, "type": pc.localDescription.type})
+
+async def on_shutdown(app):
+    coros = [pc.close() for pc in pcs]
+    await asyncio.gather(*coros)
+    pcs.clear()
+
+# --- LIFECYCLE MANAGEMENT ---
+def initiate_shutdown():
+    logger.info("Graceful shutdown sequence initiated...")
+    global CAMERA_ACTIVE
+    CAMERA_ACTIVE = False
     stop_motors()
-    try: picam2.stop()
-    except: pass
     sys.exit(0)
 
-signal.signal(signal.SIGTERM, shutdown_handler)
-signal.signal(signal.SIGINT, shutdown_handler)
-
 async def main():
+    loop = asyncio.get_running_loop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, initiate_shutdown)
+
+    # Initialize PiCamera
+    picam2 = Picamera2()
+    picam2.configure(picam2.create_video_configuration(
+        main={"size": (640, 480), "format": "RGB888"}
+    ))
     picam2.start()
-    apply_zoom(zoom_level)
-    
-    ws_server = await websockets.serve(websocket_handler, "0.0.0.0", 1606)
-    
+
+    # Start Background Tasks
+    asyncio.create_task(camera_producer(picam2))
+    asyncio.create_task(motor_watchdog())
+
+    # Start UDP Server
+    transport, protocol = await loop.create_datagram_endpoint(
+        lambda: RobotUDPControl(),
+        local_addr=("0.0.0.0", 1606)
+    )
+
+    # Start HTTP WebRTC Signaling
     app = web.Application()
-    app.router.add_get('/capture', capture_image)
+    
+    # Handle CORS for frontend integration
+    import aiohttp_cors
+    cors = aiohttp_cors.setup(app, defaults={"*": aiohttp_cors.ResourceOptions(
+        allow_credentials=True, expose_headers="*", allow_headers="*"
+    )})
+    route = app.router.add_post("/offer", rtc_offer)
+    cors.add(route)
+    
+    app.on_shutdown.append(on_shutdown)
+    
     runner = web.AppRunner(app)
     await runner.setup()
-    await web.TCPSite(runner, '0.0.0.0', 1607).start()
+    site = web.TCPSite(runner, "0.0.0.0", 1607)
+    await site.start()
 
-    log("Sistem spreman. Rotacija je sada na 50% brzine kretanja.")
-    await asyncio.Future()
+    logger.info("System Online. Ready for WebRTC and UDP commands.")
+    
+    try:
+        await asyncio.Event().wait()
+    except asyncio.CancelledError:
+        pass
+    finally:
+        transport.close()
+        picam2.stop()
 
 if __name__ == "__main__":
     try:
+        # Requires: pip install aiortc av numpy aiohttp-cors gpiozero picamera2
         asyncio.run(main())
     except KeyboardInterrupt:
         pass
