@@ -5,7 +5,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11%2B-38bdf8?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![Raspberry Pi](https://img.shields.io/badge/Hardware-RPi_5-c51a4a?style=for-the-badge&logo=raspberrypi&logoColor=white)](https://www.raspberrypi.com/)
-[![WebSockets](https://img.shields.io/badge/Network-WebSockets-075985?style=for-the-badge&logo=socketdotio&logoColor=white)](https://websockets.readthedocs.io/)
+[![WebRTC](https://img.shields.io/badge/Network-WebRTC-075985?style=for-the-badge&logo=webrtc&logoColor=white)](https://webrtc.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-94a3b8?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
 ---
@@ -20,15 +20,16 @@
 ## 🚀 Ključni Moduli
 
 ### 🛰️ Real-Time Komunikacija
-* **WebSocket Command Center:** Asinhrona obrada i distribucija komandi kretanja na portu `1606`.
-* **High-Speed Vision:** Optimizovan HTTP striming frejmova putem `/capture` endpointa (Port `1607`).
-* **Mecanum Kinematics:** Napredni algoritmi za kontrolu kretanja (napred, nazad, dijagonalno i rotacija).
+* **UDP Command Center:** Ultra-brza obrada komandi kretanja preko UDP protokola na portu `1606`.
+* **WebRTC Vision Engine:** Optimizovan video striming niskih latencija putem WebRTC `/offer` endpointa (Port `1607`).
+* **Mecanum Kinematics:** Napredni algoritmi za kontrolu kretanja motora sa O(1) vremenskom kompleksnošću.
 
 ### 📸 Vision Engineering
-* **Dynamic Zoom Engine:** Digitalna uveličanja (1.0x - 3.0x) integrisana direktno u `picamera2` bez uticaja na latenciju.
-* **Stream Optimization:** MJPEG kompresija prilagođena za stabilan prenos preko Wi-Fi pristupne tačke robota.
+* **Shared Camera Track:** Istovremeno opsluživanje N WebRTC klijenata bez konflikata i blokiranja kamere zahvaljujući `asyncio` izolaciji memorije (`PyAV`).
+* **Stream Optimization:** RGB24 video prenos optimizovan za direktan rad sa AI procesiranjem i analizom.
 
 ### 🛡️ Fail-Safe Sistemi
+* **Motor Watchdog:** Otkazivanje UDP mrežnog paketa aktivira sigurnosno zaustavljanje robota kako bi se sprečili sudari pri gubitku signala ("Runaway Robot" prevencija).
 * **Signal Handling:** Automatska neutralizacija svih GPIO izlaza pri detekciji `SIGINT` ili `SIGTERM` signala.
 * **Service Persistence:** Integracija sa `systemd` osigurava maksimalnu dostupnost i automatski oporavak servisa pri boot-u.
 
@@ -39,10 +40,10 @@
 | Komponenta | Tehnologija | Uloga |
 | :--- | :--- | :--- |
 | **OS Platforma** | Raspberry Pi OS (64-bit) | Hardversko jezgro sistema |
-| **Language** | Python 3.11+ | Glavna asinhrona logika |
-| **Camera Core** | Libcamera / Picamera2 | Video capture i obrada |
+| **Language** | Python 3.11+ | Glavna asinhrona logika (`asyncio`) |
+| **Camera Core** | Libcamera / Picamera2 / PyAV | Video capture i obrada |
 | **GPIO Control** | LGPIO / Gpiozero | Upravljanje motorima |
-| **Networking** | WebSockets & Aiohttp | Mrežni gateway |
+| **Networking** | UDP & WebRTC (`aiortc`) & Aiohttp | Mrežni gateway |
 
 ---
 
